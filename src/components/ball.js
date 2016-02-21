@@ -1,11 +1,11 @@
 var Ball = cc.PhysicsSprite.extend({
     ctor: function (filename, p, space) {
-        this._super(filename, cc.rect(0,0,25,25));
+        this._super(filename);
         
         var size = this.getContentSize(),
             body = new cp.Body(50, cp.momentForBox(50, size.width, size.height)),
             phBody = space.addBody(body),
-            shape = new cp.CircleShape(phBody, size.width/2, cc.p(0,0)),
+            shape = new cp.BoxShape(phBody, size.width, size.height),
             phShape = space.addShape(shape);
         
         phBody.p = p;

@@ -14,8 +14,13 @@ var Block = cc.PhysicsSprite.extend({
         phShape.setFriction(0);
         phShape.setCollisionType(0);
         
+        this.setScale(0.1);
         this.setBody(phBody);
         this.setRotation(0);
+        
+        var scaleUp = cc.scaleBy(0.5, 10, 10).easing(cc.easeIn(2.0));
+        
+        this.runAction(scaleUp);
     },
     down: function () {
         

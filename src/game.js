@@ -30,11 +30,6 @@ var GameLayer = cc.LayerColor.extend({
 
         /////////////////////////////
         // 3. add your codes below...
-        // add a label shows "Hello World"
-        // create and initialize a label
-        //var blockTest = new Block(res.Orange_png, cc.p(300,300), this.space);
-        
-        //this.addChild(blockTest);
         this.scenario = new Scenario(this);
         
         var layer = this;
@@ -43,7 +38,7 @@ var GameLayer = cc.LayerColor.extend({
             layer.scenario.next();
         };
         
-        var ball = new Ball(res.Ball_png, cc.p(300, 100), this.space);
+        var ball = new Ball(res.Brick_png, cc.p(300, 100), this.space);
         
         //ball.body.vx = 50;
         //ball.body.vy = 300;
@@ -62,18 +57,20 @@ var GameLayer = cc.LayerColor.extend({
         		    console.log(str, this.endPosition);
         		    var deltay = (this.endPosition.y - this.startPosition.y);
         		    var deltax = (this.endPosition.x - this.startPosition.x);
-        		    var dist = Math.sqrt(deltax * deltax + deltay * deltay);
-        		   
+        		    var dist = Math.sqrt(deltax*deltax + deltay*deltay);
+        		    if(!dist || dist < 10){
+        		        return ;
+        		    }
+        		    var ByVX = deltax / dist;
+        		    var ByVY = deltay / dist;
         		    
-        		    var ByVY = (deltay/dist);
-        		    var ByVX = (deltax/dist);
+        		    if(ByVY <0.2588){
+            		    ByVY = 0.2588;
+            		    ByVX = (deltax>0)? 0.9659258: -0.9659258;
+        		    }
         		    
-        		    console.log("$$ ",ball);
-        		    ball.body.vx = ByVX*50;
-        		    ball.body.vy = ByVY*50;
-        		    
-        		    console.log("$$$$$$$$$$$$$$", deltax, deltay);
-        		    console.log("$$$$$$$$$$$$$$", ByVX*50,  ByVY*50);
+        		    ball.body.vx = ByVX * 200;
+        		    ball.body.vy = ByVY * 200;
         		    
         		    return true;
         		    
@@ -129,9 +126,10 @@ var GameLayer = cc.LayerColor.extend({
         
         var layer = this;
         
-        this.space.addCollisionHandler(1, 0, function () {
+        this.space.addCollisionHandler(1, 0, function (arbiter, space) {
             // TODO do something
-        });
+            console.log(arbiter.a, arbiter.b);
+        }, null, null, null);
     },
     update: function (dt) {
         this.space.step(dt);

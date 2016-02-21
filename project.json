@@ -20,6 +20,7 @@
         
         "src/components/ball.js",
         "src/components/block.js",
-        "src/components/scenario.js"
+        "src/components/scenario.js",
+        "src/components/wall.js"
     ]
 }

@@ -27,15 +27,14 @@ var TitleLayer = cc.LayerColor.extend({
 */
         var gametitle = new cc.Sprite(res.Gametitle_png );
         gametitle.setAnchorPoint(0, 0);
-        gametitle.setScaleX(640/480);
-        gametitle.setScaleY(960/720);
         this.addChild(gametitle);
         console.log("",size)
         
         cc.MenuItemFont.setFontSize(30);
         cc.MenuItemFont.setFontName("Impact");
-        var closeItem = new cc.MenuItemFont.create(
-          "Game Start !",
+        var closeItem = cc.MenuItemImage.create(//new cc.MenuItemFont.create(
+          res.Start_png,
+          res.StartHover_png,
           function () {
             var scene = new GameScene();
             cc.director.runScene(scene);

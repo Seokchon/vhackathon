@@ -1,4 +1,34 @@
 
+var GameOverLayer = cc.LayerColor.extend({
+    ctor: function() {
+        this._super(cc.color(250,250,250,255));
+        this.init();
+        return true;
+    },
+    init: function() {
+        var winSize = cc.director.getWinSize();
+        var centerPos = cc.p(winSize.width/2, winSize.height/2);
+        
+        cc.MenuItemFont.setFontSize(50);
+        cc.MenuItemFont.setFontName("Impact");
+       // cc.MenuItemFont.setColor(cc.color(50, 50, 50, 255));
+        
+        var menuItemRestart = new cc.MenuItemFont.create(
+          "Game Restart",
+          this.onRestart, this);
+          
+        var menu = new cc.Menu(menuItemRestart);
+        menu.setPosition(centerPos);
+        
+        this.addChild(menu,105);
+    },
+    onRestart:function(sender){
+        cc.director.resume();
+        cc.director.runScene(new GameLayer());
+    }
+});
+
+
 var GameLayer = cc.LayerColor.extend({
     size: null,
     sprite: null,
@@ -6,8 +36,10 @@ var GameLayer = cc.LayerColor.extend({
     //ball: null,
     startPosition: null,
     endPosition: null,
+    lock:false,
     fragils: [],
-    next: false,
+    next: true,
+    score: 0,
     ctor: function () {
         //////////////////////////////
         // 1. super init first
@@ -26,12 +58,22 @@ var GameLayer = cc.LayerColor.extend({
         // ask the window size
         var size = this.size;
         
-        debugNode = new cc.PhysicsDebugNode(this.space);
-        debugNode.visible = true;
-        this.addChild(debugNode);
+        // debugNode = new cc.PhysicsDebugNode(this.space);
+        // debugNode.visible = true;
+        // this.addChild(debugNode);
 
         /////////////////////////////
         // 3. add your codes below...
+        
+        var panel = new cc.Sprite();
+        
+        panel.setColor(new cc.Color(50, 50, 50, 255));
+        panel.setAnchorPoint(0, 0);
+        panel.setTextureRect(cc.rect(0,0,size.width,100));
+        
+        this.addChild(panel);
+        
+        
         this.scenario = new Scenario(this);
         
         var layer = this;
@@ -40,8 +82,10 @@ var GameLayer = cc.LayerColor.extend({
             layer.scenario.next();
         };
         
-        var ball = new Ball(res.Brick_png, cc.p(300, 100), this.space);
-        console.log(ball);
+        var ball = new Ball(res.Brick_png, cc.p((size.width / 2) + 25, 113), this.space);
+        this.addChild(ball);
+        
+        this.ball = ball;
         // var angrysprite = new cc.Sprite(res.Brick_png);
         // angrysprite.setPosition(cc.p(-100,100));
         
@@ -53,77 +97,47 @@ var GameLayer = cc.LayerColor.extend({
         
         if(cc.sys.capabilities.hasOwnProperty( 'mouse') ){
             cc.eventManager.addListener({
-        	    event: cc.EventListener.MOUSE,
-        	    
-        	    onMouseUp: function(event){
-        		    var str = "Mouse Up detected, Key: " + event.getButton();
-        		    if(event.getButton()==0){
-        		        this.endPosition = cc.p(event.getLocationX(), event.getLocationY());
-        		    }
-        		    console.log(str, this.endPosition);
-        		    // var deltay = (this.endPosition.y - this.startPosition.y);
-        		    // var deltax = (this.endPosition.x - this.startPosition.x);
-        		    var deltay = (this.endPosition.y - ball.body.p.y);
-        		    var deltax = (this.endPosition.x - ball.body.p.x);
-        		    var dist = Math.sqrt(deltax*deltax + deltay*deltay);
-        		    if(!dist || dist < 10){
-        		        return ;
-        		    }
-        		    var ByVX = deltax / dist;
-        		    var ByVY = deltay / dist;
-        		    
-        		    if(ByVY <0.2588){
-            		    ByVY = 0.2588;
-            		    ByVX = (deltax>0)? 0.9659258: -0.9659258;
-        		    }
-        		    
-        		    console.log("start",ball.body);
-        		    ball.body.vx = ByVX * 500;
-        		    ball.body.vy = ByVY * 500     		    
-        		    return true;
-        		    
-        	    },
-        	    onMouseDown: function(event){
-        		    var str = "Mouse Down detected, Key: " + event.getButton();
-        		    if(event.getButton()==0){
-        		        this.startPosition = cc.p(event.getLocationX(), event.getLocationY());
-        		    }
-        		    
-        		    console.log(event);
-        		    // do something..
-        		    console.log(str, this.startPosition);
-        		    return true;
-        	    }
-            },this);
-
-/*
-            cc.eventManager.addListener({
-                event:cc.EventListener.Mouse ,
-                onMouseMove: function(event){
-                    console.log(event);
-                    var str = "MousePosition X: " + event.getLocationX() + "  Y:" + event.getLocationY();
-                    // do something...
-                    console.log(str);
-                    return true;
-                },
+                event: cc.EventListener.MOUSE,
+                
                 onMouseUp: function(event){
-                    console.log(event);
-            	    var str = "Mouse Up detected, Key: " + event.getButton();
-            	    this.endPosition = cc.p(event.getLocationX(), event.getLocationY());
-            	    console.log(str, this.endPosition);
-            	    return true;
+                    console.log(layer.lock);
+                    if(layer.lock){
+                        return false;
+                    } else {
+                        layer.lock=true;
+                        var str = "Mouse Up detected, Key: " + event.getButton();
+                        if(event.getButton()===0){
+                            this.endPosition = cc.p(event.getLocationX(), event.getLocationY());
+                        }
+                        var deltay = (this.endPosition.y - ball.body.p.y);
+                        var deltax = (this.endPosition.x - ball.body.p.x);
+                        var dist = Math.sqrt(deltax*deltax + deltay*deltay);
+                        if(!dist || dist < 10){
+                            return ;
+                        }
+                        var ByVX = deltax / dist;
+                        var ByVY = deltay / dist;
+                        
+                        if(ByVY <0.2588){
+                            ByVY = 0.2588;
+                            ByVX = (deltax>0)? 0.9659258: -0.9659258;
+                        }
+                        
+                        console.log("start",ball.body);
+                        ball.body.vx = ByVX * 600;
+                        ball.body.vy = ByVY * 600;  
+                        return true;
+                    }    
                 },
                 onMouseDown: function(event){
-                    console.log(event);
-            	    var str = "Mouse Down detected, Key: " + event.getButton();
-            	    this.startPosition = cc.p(event.getLocationX(), event.getLocationY());
-            	    console.log(str, this.startPosition);
-            	    return true;
+                    var str = "Mouse Down detected, Key: " + event.getButton();
+                    if(event.getButton()===0){
+                        this.startPosition = cc.p(event.getLocationX(), event.getLocationY());
+                    }
+                    return true;
                 }
-                //onMouseMove: this.onMouseMove(event).bind(this),
-        	    //onMouseUp: this.onMouseMove(event).bind(this),
-        	    //onMouseDown: this.onMouseMove(event).bind(this)
-            },this);*/
+            },this);
+
         }
     },
     
@@ -136,23 +150,27 @@ var GameLayer = cc.LayerColor.extend({
         
         
         this.space.addCollisionHandler(0, 2, function (arbiter, space) {
-            // TODO do something
             if (!!arbiter.a.reset) {
                 layer.next = true;
                 arbiter.b.stop();
+                console.log(layer.lock);
+                layer.lock = false;
             }
+            
             return true;
         }, null, null, null);
         
         this.space.addCollisionHandler(1, 2, function (arbiter, space) {
             layer.fragils.push(arbiter.a);
+            
+            console.log(arbiter);
+            
             return true;
         }, null, null, null);
         
         this.space.addCollisionHandler(0, 1, function (arbiter, space) {
-            // TODO do something
             cc.director.pause();
-            console.log("Game Over");
+            layer.addChild(new GameOverLayer());
         }, null, null, null);
     },
     update: function (dt) {
@@ -163,16 +181,38 @@ var GameLayer = cc.LayerColor.extend({
             this.scenario.next();
         }
         
+        //console.log(this.ball.body.vx, this.ball.body.vy);
+        
+        var vx = this.ball.body.vx,
+            vy = this.ball.body.vy,
+            speed = Math.sqrt(vx * vx + vy * vy);
+            
+        if (speed && speed < 300) {
+            this.ball.body.vx *= 300 / speed;
+            this.ball.body.vy *= 300 / speed;
+        } else if (speed > 600) {
+            this.ball.body.vx *= 600 / speed;
+            this.ball.body.vy *= 600 / speed;
+        }
+        
         for (var i = this.fragils.length;i--;) {
             var shape = this.fragils.pop(),
                 sprite = shape.getBlockSprite();
                 
-            this.space.removeShape(shape);
-            this.removeChild(sprite);
-            sprite.fragil();
+            if (sprite.damage() <= 0) {
+                this.space.removeShape(shape);
+                this.removeChild(sprite);
+                sprite.fragil();
+                this.score++;
+                
+                console.log(this.score);
+            }
+                
         }
     }
+    
 });
+
 
 var GameScene = cc.Scene.extend({
     onEnter: function () {
@@ -181,7 +221,3 @@ var GameScene = cc.Scene.extend({
         this.addChild(layer);
     }
 });
-
-
-
-// zeroxy

@@ -1,6 +1,15 @@
 var Block = cc.PhysicsSprite.extend({
-    ctor: function (filename, p, space) {
-        this._super(filename, cc.rect(0,0,50,50));
+    images: [res.yellow_png, res.green_png, res.red_png, res.grey_png],
+    sprites : [],
+    ctor: function (life, p, space) {
+        //this._super(this.images[life-1], cc.rect(0,0,50,50));
+        this._super(this.images[0], cc.rect(0,0,50,50));
+        
+        for(var i =1; i <life; i++){
+            this.sprites[i] = new cc.Sprite(this.images[i], cc.rect(0,0,50,50));
+            this.sprites[i].setPosition( cc.p(25,25) );
+            this.addChild(this.sprites[i], i);
+        }
         
         var sprite = this,
             size = this.getContentSize(),
@@ -24,6 +33,7 @@ var Block = cc.PhysicsSprite.extend({
         this.setScale(0.1);
         this.setBody(phBody);
         this.setRotation(0);
+        this.life = life;
         
         var scaleUp = cc.scaleBy(0.5, 10, 10).easing(cc.easeIn(2.0));
         
@@ -38,6 +48,15 @@ var Block = cc.PhysicsSprite.extend({
         
         
         // check gameover
+    },
+    damage: function () {
+        
+        if (this.life>0){
+            this.removeChild(this.sprites[this.life-1],true);
+        }
+        this.life--;
+        
+        return this.life;
     },
     onFragil: function (cb) {
         this.fragilHandler.push(cb);

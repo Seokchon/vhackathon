@@ -10,6 +10,7 @@ var Ball = cc.PhysicsSprite.extend({
             phShape = space.addShape(shape);
         
         phBody.p = p;
+        phBody.w_limit = 13;
         
         phShape.setElasticity(1);
         phShape.setFriction(0);
@@ -20,15 +21,14 @@ var Ball = cc.PhysicsSprite.extend({
         
         phShape.stop = function () {
             
-            console.log("Stop");
-            console.log("body ",phBody);
+            // console.log("Stop");
+            // console.log("body ",phBody);
             sprite.setRotation(0);
             
             phBody.w = 0;
             phBody.vx = 0;
             phBody.vy = 0;
-            phBody.p.y = 13;
-            //phBody.setDynamic(true);
+            phBody.p.y = 113;
         };
         
     }

@@ -7,20 +7,33 @@ function Scenario(layer) {
 }
 
 Scenario.prototype = {
-    images: [res.green_png, res.red_png, res.yellow_png, res.grey_png],
     init: function () {
         var space = this.layer.space,
             width = this.size.width,
             height = this.size.height;
         
         // top
-        new Wall(space, cp.v(0, height), cp.v(width, height));
+        this.layer.addChild(new Wall(space, cp.v(0, height - 50), cp.v(width, height)), 1000);
         // bottom
-        new Wall(space, cp.v(0, 0), cp.v(width, 0), true);
+        this.layer.addChild(new Wall(space, cp.v(0, 0), cp.v(width, 100), true), 1000);
         // left
-        new Wall(space, cp.v(0, 0), cp.v(0, height));
+        this.layer.addChild(new Wall(space, cp.v(-10, 100), cp.v(0, height)), 1000);
         // right
-        new Wall(space, cp.v(width, 0), cp.v(width, height));
+        this.layer.addChild(new Wall(space, cp.v(width, 100), cp.v(width + 10, height)), 1000);
+    },
+    pick: function () {
+        
+        var pick = ~~(Math.random() * Math.max(100-this.level, 60));
+        
+        if (pick > 40) {
+            return 1;
+        } else if (pick > 20) {
+            return 2;
+        } else if (pick > 5) {
+            return 3;
+        } else {
+            return 4;
+        }
     },
     next: function () {
         this.level++;
@@ -50,8 +63,8 @@ Scenario.prototype = {
     },
     addBlock: function (x) {
         var scenario = this,
-            topLineHeight = this.size.height - 75,
-            block = new Block(this.images[((~~(Math.random() * 10)) % 4)], cc.p(x, topLineHeight), this.layer.space);
+            topLineHeight = this.size.height - 100,
+            block = new Block(this.pick(), cc.p(x, topLineHeight), this.layer.space);
         
         block.onFragil(function () {
             scenario.destroyBlock(block);

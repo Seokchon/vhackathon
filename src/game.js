@@ -6,6 +6,8 @@ var GameLayer = cc.LayerColor.extend({
     //ball: null,
     startPosition: null,
     endPosition: null,
+    fragils: [],
+    next: false,
     ctor: function () {
         //////////////////////////////
         // 1. super init first
@@ -39,7 +41,11 @@ var GameLayer = cc.LayerColor.extend({
         };
         
         var ball = new Ball(res.Brick_png, cc.p(300, 100), this.space);
+        console.log(ball);
+        // var angrysprite = new cc.Sprite(res.Brick_png);
+        // angrysprite.setPosition(cc.p(-100,100));
         
+        // ball.addChild(angrysprite);
         //ball.body.vx = 50;
         //ball.body.vy = 300;
         
@@ -55,8 +61,10 @@ var GameLayer = cc.LayerColor.extend({
         		        this.endPosition = cc.p(event.getLocationX(), event.getLocationY());
         		    }
         		    console.log(str, this.endPosition);
-        		    var deltay = (this.endPosition.y - this.startPosition.y);
-        		    var deltax = (this.endPosition.x - this.startPosition.x);
+        		    // var deltay = (this.endPosition.y - this.startPosition.y);
+        		    // var deltax = (this.endPosition.x - this.startPosition.x);
+        		    var deltay = (this.endPosition.y - ball.body.p.y);
+        		    var deltax = (this.endPosition.x - ball.body.p.x);
         		    var dist = Math.sqrt(deltax*deltax + deltay*deltay);
         		    if(!dist || dist < 10){
         		        return ;
@@ -69,9 +77,9 @@ var GameLayer = cc.LayerColor.extend({
             		    ByVX = (deltax>0)? 0.9659258: -0.9659258;
         		    }
         		    
-        		    ball.body.vx = ByVX * 300;
-        		    ball.body.vy = ByVY * 300;
-        		    
+        		    console.log("start",ball.body);
+        		    ball.body.vx = ByVX * 500;
+        		    ball.body.vy = ByVY * 500     		    
         		    return true;
         		    
         	    },
@@ -126,13 +134,43 @@ var GameLayer = cc.LayerColor.extend({
         
         var layer = this;
         
-        this.space.addCollisionHandler(1, 0, function (arbiter, space) {
+        
+        this.space.addCollisionHandler(0, 2, function (arbiter, space) {
             // TODO do something
-            console.log(arbiter.a, arbiter.b);
+            if (!!arbiter.a.reset) {
+                layer.next = true;
+                arbiter.b.stop();
+            }
+            return true;
+        }, null, null, null);
+        
+        this.space.addCollisionHandler(1, 2, function (arbiter, space) {
+            layer.fragils.push(arbiter.a);
+            return true;
+        }, null, null, null);
+        
+        this.space.addCollisionHandler(0, 1, function (arbiter, space) {
+            // TODO do something
+            cc.director.pause();
+            console.log("Game Over");
         }, null, null, null);
     },
     update: function (dt) {
         this.space.step(dt);
+        
+        if (this.next) {
+            this.next = false;
+            this.scenario.next();
+        }
+        
+        for (var i = this.fragils.length;i--;) {
+            var shape = this.fragils.pop(),
+                sprite = shape.getBlockSprite();
+                
+            this.space.removeShape(shape);
+            this.removeChild(sprite);
+            sprite.fragil();
+        }
     }
 });
 

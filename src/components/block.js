@@ -2,7 +2,8 @@ var Block = cc.PhysicsSprite.extend({
     ctor: function (filename, p, space) {
         this._super(filename, cc.rect(0,0,50,50));
         
-        var size = this.getContentSize(),
+        var sprite = this,
+            size = this.getContentSize(),
             body = new cp.Body(Infinity, Infinity),
             phBody = space.addBody(body),
             shape = new cp.CircleShape(phBody, size.width/2, cc.p(0,0)),
@@ -10,9 +11,15 @@ var Block = cc.PhysicsSprite.extend({
         
         phBody.p = p;
         
+        sprite.fragilHandler = [];
+        
         phShape.setElasticity(1);
         phShape.setFriction(0);
-        phShape.setCollisionType(0);
+        phShape.setCollisionType(1);
+        
+        phShape.getBlockSprite = function () {
+            return sprite;
+        };
         
         this.setScale(0.1);
         this.setBody(phBody);
@@ -31,5 +38,13 @@ var Block = cc.PhysicsSprite.extend({
         
         
         // check gameover
+    },
+    onFragil: function (cb) {
+        this.fragilHandler.push(cb);
+    },
+    fragil: function () {
+        this.fragilHandler.forEach(function (handler) {
+            handler();
+        });
     }
 });

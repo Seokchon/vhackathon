@@ -7,6 +7,7 @@ function Scenario(layer) {
 }
 
 Scenario.prototype = {
+    images: [res.green_png, res.red_png, res.yellow_png, res.grey_png],
     init: function () {
         var space = this.layer.space,
             width = this.size.width,
@@ -15,7 +16,7 @@ Scenario.prototype = {
         // top
         new Wall(space, cp.v(0, height), cp.v(width, height));
         // bottom
-        new Wall(space, cp.v(0, 0), cp.v(width, 0));
+        new Wall(space, cp.v(0, 0), cp.v(width, 0), true);
         // left
         new Wall(space, cp.v(0, 0), cp.v(0, height));
         // right
@@ -48,13 +49,18 @@ Scenario.prototype = {
         
     },
     addBlock: function (x) {
-        var topLineHeight = this.size.height - 75,
-            block = new Block(res.Orange_png, cc.p(x, topLineHeight), this.layer.space);
+        var scenario = this,
+            topLineHeight = this.size.height - 75,
+            block = new Block(this.images[((~~(Math.random() * 10)) % 4)], cc.p(x, topLineHeight), this.layer.space);
+        
+        block.onFragil(function () {
+            scenario.destroyBlock(block);
+        });
         
         this.blocks.push(block);
         this.layer.addChild(block);
     },
     destroyBlock: function (block) {
-        // TODO Destroy block
+        this.blocks.splice(this.blocks.indexOf(block), 1);
     }
 };

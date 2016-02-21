@@ -69,8 +69,8 @@ var GameLayer = cc.LayerColor.extend({
             		    ByVX = (deltax>0)? 0.9659258: -0.9659258;
         		    }
         		    
-        		    ball.body.vx = ByVX * 200;
-        		    ball.body.vy = ByVY * 200;
+        		    ball.body.vx = ByVX * 300;
+        		    ball.body.vy = ByVY * 300;
         		    
         		    return true;
         		    

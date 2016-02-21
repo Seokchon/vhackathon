@@ -9,10 +9,17 @@
     "renderMode" : 0,
     "engineDir":"frameworks/cocos2d-html5",
 
-    "modules" : ["cocos2d"],
+    "modules" : ["cocos2d","chipmunk"],
 
     "jsList" : [
         "src/resource.js",
-        "src/app.js"
+        "src/app.js",
+        "src/title.js",
+        "src/game.js",
+
+        
+        "src/components/ball.js",
+        "src/components/block.js",
+        "src/components/scenario.js"
     ]
 }

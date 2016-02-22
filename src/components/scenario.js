@@ -8,18 +8,37 @@ function Scenario(layer) {
 
 Scenario.prototype = {
     init: function () {
-        var space = this.layer.space,
+        var layer = this.layer,
+            space = this.layer.space,
             width = this.size.width,
-            height = this.size.height;
+            height = this.size.height,
+            t = height-50,
+            r = width-10,
+            b = 100,
+            l = 10,
+            walls = [
+                // top
+                new Wall(cc.rect(l, t, r, height-t)),
+                // bottom
+                new Wall(cc.rect(l, 0, r, b)),
+                // left
+                new Wall(cc.rect(0, 0, l, height)),
+                // right
+                new Wall(cc.rect(r, 0, width-r, height))
+            ];
         
         // top
-        this.layer.addChild(new Wall(space, cp.v(0, height - 50), cp.v(width, height)), 1000);
+        new Boundary(space, cp.v(l, t), cp.v(r, t));
         // bottom
-        this.layer.addChild(new Wall(space, cp.v(0, 0), cp.v(width, 100), true), 1000);
+        new Boundary(space, cp.v(l, b), cp.v(r, b), true);
         // left
-        this.layer.addChild(new Wall(space, cp.v(-10, 100), cp.v(0, height)), 1000);
+        new Boundary(space, cp.v(l, b), cp.v(l, t));
         // right
-        this.layer.addChild(new Wall(space, cp.v(width, 100), cp.v(width + 10, height)), 1000);
+        new Boundary(space, cp.v(r, b), cp.v(r, t));
+        
+        walls.forEach(function (wall) {
+            layer.addChild(wall, 1000);
+        });
     },
     pick: function () {
         

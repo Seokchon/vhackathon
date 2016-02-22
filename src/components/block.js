@@ -41,7 +41,7 @@ var Block = cc.PhysicsSprite.extend({
     },
     down: function () {
         
-        var down = cc.moveBy(0.5, cc.p(0 , -75)).easing(cc.easeIn(2.0));
+        var down = cc.moveBy(0.5, cc.p(0, -75)).easing(cc.easeIn(2.0));
         
         this.runAction(down);
         
@@ -50,6 +50,14 @@ var Block = cc.PhysicsSprite.extend({
         // check gameover
     },
     damage: function () {
+        
+        var brrr = cc.sequence(
+            cc.moveBy(0.02, cc.p(2, 0)),
+            cc.repeat(cc.sequence(cc.moveBy(0.05, cc.p(-4, 0)),cc.moveBy(0.05, cc.p(4, 0))),6),
+            cc.moveBy(0.02, cc.p(-2, 0))
+        );
+        
+        this.runAction(brrr);
         
         if (this.life>0){
             this.removeChild(this.sprites[this.life-1],true);

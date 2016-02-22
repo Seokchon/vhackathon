@@ -19,6 +19,13 @@ var Ball = cc.PhysicsSprite.extend({
         this.setBody(phBody);
         this.setRotation(0);
         
+        var angry = cc.sequence(
+                cc.scaleTo(0.3, 0.85, 0.85),
+                cc.scaleTo(0.3, 1, 1)
+            ).easing(cc.easeIn(2.0)).repeatForever();
+            
+        this.runAction(angry);
+        
         phShape.stop = function () {
             
             // console.log("Stop");

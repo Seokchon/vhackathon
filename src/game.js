@@ -43,7 +43,7 @@ var GameLayer = cc.LayerColor.extend({
     ctor: function () {
         //////////////////////////////
         // 1. super init first
-        this._super(cc.color(250,250,250,255));
+        this._super(cc.color(50,50,50,255));
         this.size = cc.winSize;
         this.initPhysics();
         this.init(this);
@@ -64,15 +64,6 @@ var GameLayer = cc.LayerColor.extend({
 
         /////////////////////////////
         // 3. add your codes below...
-        
-        var panel = new cc.Sprite();
-        
-        panel.setColor(new cc.Color(50, 50, 50, 255));
-        panel.setAnchorPoint(0, 0);
-        panel.setTextureRect(cc.rect(0,0,size.width,100));
-        
-        this.addChild(panel);
-        
         
         this.scenario = new Scenario(this);
         
@@ -101,44 +92,68 @@ var GameLayer = cc.LayerColor.extend({
                 
                 onMouseUp: function(event){
                     console.log(layer.lock);
-                    if(layer.lock){
-                        return false;
-                    } else {
-                        layer.lock=true;
-                        var str = "Mouse Up detected, Key: " + event.getButton();
-                        if(event.getButton()===0){
-                            this.endPosition = cc.p(event.getLocationX(), event.getLocationY());
-                        }
-                        var deltay = (this.endPosition.y - ball.body.p.y);
-                        var deltax = (this.endPosition.x - ball.body.p.x);
-                        var dist = Math.sqrt(deltax*deltax + deltay*deltay);
-                        if(!dist || dist < 10){
-                            return ;
-                        }
-                        var ByVX = deltax / dist;
-                        var ByVY = deltay / dist;
-                        
-                        if(ByVY <0.2588){
-                            ByVY = 0.2588;
-                            ByVX = (deltax>0)? 0.9659258: -0.9659258;
-                        }
-                        
-                        console.log("start",ball.body);
-                        ball.body.vx = ByVX * 600;
-                        ball.body.vy = ByVY * 600;  
-                        return true;
-                    }    
+                    if(event.getButton()===0){
+                        return layer.touchEnd(event.getLocationX(), event.getLocationY());
+                    }  
                 },
                 onMouseDown: function(event){
                     var str = "Mouse Down detected, Key: " + event.getButton();
                     if(event.getButton()===0){
-                        this.startPosition = cc.p(event.getLocationX(), event.getLocationY());
+                        return layer.touchBegan(event.getLocationX(), event.getLocationY());
                     }
                     return true;
                 }
             },this);
 
         }
+        
+        cc.eventManager.addListener({
+            event: cc.EventListener.TOUCH_ONE_BY_ONE,
+            swallowTouches: true,
+            onTouchBegan: function (touch, event) {
+                console.log(touch);
+                var location = touch.getLocation();
+                return layer.touchEnd(location.x, location.y);
+            },
+            onTouchEnded: function (touch, event) {
+                var location = touch.getLocation();
+                return layer.touchBegan(location.x, location.y);
+            }
+        }, this);
+    },
+    
+    touchBegan: function(x, y) {
+        this.startPosition = cc.p(x, y);
+        return true;
+    },
+    
+    touchEnd: function(x, y) {
+        if(this.lock) {
+            return false;
+        } else {
+            this.lock=true;
+            
+            this.endPosition = cc.p(x, y);
+            
+            var deltay = (this.endPosition.y - this.ball.body.p.y);
+            var deltax = (this.endPosition.x - this.ball.body.p.x);
+            var dist = Math.sqrt(deltax*deltax + deltay*deltay);
+            if(!dist || dist < 10){
+                return ;
+            }
+            var ByVX = deltax / dist;
+            var ByVY = deltay / dist;
+            
+            if(ByVY <0.2588){
+                ByVY = 0.2588;
+                ByVX = (deltax>0)? 0.9659258: -0.9659258;
+            }
+            
+            this.ball.body.vx = ByVX * 600;
+            this.ball.body.vy = ByVY * 600;
+            
+            return true;
+        }    
     },
     
     initPhysics: function () {
@@ -153,8 +168,8 @@ var GameLayer = cc.LayerColor.extend({
             if (!!arbiter.a.reset) {
                 layer.next = true;
                 arbiter.b.stop();
-                console.log(layer.lock);
                 layer.lock = false;
+                console.log(arbiter.a);
             }
             
             return true;
@@ -162,9 +177,6 @@ var GameLayer = cc.LayerColor.extend({
         
         this.space.addCollisionHandler(1, 2, function (arbiter, space) {
             layer.fragils.push(arbiter.a);
-            
-            console.log(arbiter);
-            
             return true;
         }, null, null, null);
         

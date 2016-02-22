@@ -1,9 +1,11 @@
 var Block = cc.PhysicsSprite.extend({
     images: [res.yellow_png, res.green_png, res.red_png, res.grey_png],
-    sprites : [],
+    sprites : null,
     ctor: function (life, p, space) {
         //this._super(this.images[life-1], cc.rect(0,0,50,50));
         this._super(this.images[0], cc.rect(0,0,50,50));
+        
+        this.sprites = [];
         
         for(var i =1; i <life; i++){
             this.sprites[i] = new cc.Sprite(this.images[i], cc.rect(0,0,50,50));
@@ -52,15 +54,15 @@ var Block = cc.PhysicsSprite.extend({
     damage: function () {
         
         var brrr = cc.sequence(
-            cc.moveBy(0.02, cc.p(2, 0)),
-            cc.repeat(cc.sequence(cc.moveBy(0.05, cc.p(-4, 0)),cc.moveBy(0.05, cc.p(4, 0))),6),
-            cc.moveBy(0.02, cc.p(-2, 0))
+            cc.moveBy(0.02, cc.p(3, 0)),
+            cc.repeat(cc.sequence(cc.moveBy(0.05, cc.p(-6, 0)),cc.moveBy(0.05, cc.p(6, 0))),6),
+            cc.moveBy(0.02, cc.p(-3, 0))
         );
         
         this.runAction(brrr);
         
-        if (this.life>0){
-            this.removeChild(this.sprites[this.life-1],true);
+        if (this.life > 0) {
+            this.removeChild(this.sprites[this.life-1], true);
         }
         this.life--;
         

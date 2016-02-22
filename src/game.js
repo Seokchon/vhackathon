@@ -1,14 +1,65 @@
 
 var GameOverLayer = cc.LayerColor.extend({
+    background:null,
+    restart_norm:null,
+    restart_hover:null,
+    score_title:null,
+    best_score:null,
+    scoreLabel:null,
+    bestscoreLabel:null,
     ctor: function() {
-        this._super(cc.color(250,250,250,255));
+        this._super(cc.color(0,0,0,80));
         this.init();
         return true;
     },
     init: function() {
         var winSize = cc.director.getWinSize();
         var centerPos = cc.p(winSize.width/2, winSize.height/2);
+        var best = parseInt(localStorage.getItem('best')),
+            score = parseInt(localStorage.getItem('score'));
+            
+        console.log(best, score);
         
+        this.background = new cc.Sprite(res.gameover_back_png),
+        this.background.setPosition(centerPos);
+        this.addChild(this.background,2000);
+        
+        this.score_title = new cc.Sprite(res.gameover_score_png);
+        this.score_title.setPosition(centerPos);
+        this.best_score = new cc.Sprite(res.gameover_best_png);
+        this.best_score.setPosition(centerPos);
+        
+        this.addChild(this.score_title);
+        this.addChild(this.best_score);
+        
+        this.scoreLabel = new cc.LabelTTF(" "+score, "Impact", 30);
+        this.scoreLabel.setPosition(winSize.width/2 +50, winSize.height/2 -33);
+        this.addChild(this.scoreLabel, 2005);
+        
+        
+        
+        this.bestscoreLabel = new cc.LabelTTF(" "+best, "Impact", 30);
+        this.bestscoreLabel.setPosition(winSize.width/2 +50, winSize.height/2 +59);
+        this.addChild(this.bestscoreLabel, 2005);
+        
+        
+        
+        var closeItem = cc.MenuItemImage.create(//new cc.MenuItemFont.create(
+          res.gameover_restart_png,
+          res.gameover_restart_hover_png,
+          //gameover_restart_mark_png,
+          //gameover_restart_mark_png,
+          
+          function () {
+            this.onRestart()
+          },this);
+    
+        var menu = new cc.Menu(closeItem);
+        menu.setPosition(centerPos);
+        this.addChild(menu, 2001);
+        
+        
+        /*
         cc.MenuItemFont.setFontSize(50);
         cc.MenuItemFont.setFontName("Impact");
        // cc.MenuItemFont.setColor(cc.color(50, 50, 50, 255));
@@ -21,6 +72,7 @@ var GameOverLayer = cc.LayerColor.extend({
         menu.setPosition(centerPos);
         
         this.addChild(menu,105);
+        */
     },
     onRestart:function(sender){
         cc.director.resume();
@@ -29,7 +81,7 @@ var GameOverLayer = cc.LayerColor.extend({
 });
 
 
-var GameLayer = cc.LayerColor.extend({
+var GameLayer = cc.Layer.extend({
     size: null,
     sprite: null,
     space: null,
@@ -40,14 +92,17 @@ var GameLayer = cc.LayerColor.extend({
     fragils: [],
     next: true,
     score: 0,
+    scoreLabel:"",
+    background:null,
     ctor: function () {
         //////////////////////////////
         // 1. super init first
-        this._super(cc.color(50,50,50,255));
+        this._super();
         this.size = cc.winSize;
         this.initPhysics();
         this.init(this);
 
+        
         return true;
     },
     init: function () {
@@ -64,6 +119,11 @@ var GameLayer = cc.LayerColor.extend({
 
         /////////////////////////////
         // 3. add your codes below...
+        
+        this.background = new cc.Sprite(res.mainBack_png, cc.rect(0, 0, size.width, size.height));
+        this.background.setPosition(size.width/2, size.height/2);
+        this.addChild(this.background);
+        
         
         this.scenario = new Scenario(this);
         
@@ -84,6 +144,10 @@ var GameLayer = cc.LayerColor.extend({
         //ball.body.vx = 50;
         //ball.body.vy = 300;
         
+        this.scoreLabel = new cc.LabelTTF(" "+this.score, "Impact", 30);
+        this.scoreLabel.setPosition(200, size.height-25);
+        this.addChild(this.scoreLabel, 1005);
+        
         this.scheduleUpdate();
         
         if(cc.sys.capabilities.hasOwnProperty( 'mouse') ){
@@ -91,7 +155,6 @@ var GameLayer = cc.LayerColor.extend({
                 event: cc.EventListener.MOUSE,
                 
                 onMouseUp: function(event){
-                    console.log(layer.lock);
                     if(event.getButton()===0){
                         return layer.touchEnd(event.getLocationX(), event.getLocationY());
                     }  
@@ -109,9 +172,8 @@ var GameLayer = cc.LayerColor.extend({
         
         cc.eventManager.addListener({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            swallowTouches: true,
+            swallowTouches: false,
             onTouchBegan: function (touch, event) {
-                console.log(touch);
                 var location = touch.getLocation();
                 return layer.touchEnd(location.x, location.y);
             },
@@ -169,7 +231,6 @@ var GameLayer = cc.LayerColor.extend({
                 layer.next = true;
                 arbiter.b.stop();
                 layer.lock = false;
-                console.log(arbiter.a);
             }
             
             return true;
@@ -182,11 +243,19 @@ var GameLayer = cc.LayerColor.extend({
         
         this.space.addCollisionHandler(0, 1, function (arbiter, space) {
             cc.director.pause();
+            
+            localStorage.setItem('score', layer.score);
+            var best = parseInt(localStorage.getItem('best'));
+            localStorage.setItem('best', Math.max(best, layer.score));
+            
             layer.addChild(new GameOverLayer());
+            
         }, null, null, null);
     },
     update: function (dt) {
         this.space.step(dt);
+        
+        this.scoreLabel.setString(" "+this.score);
         
         if (this.next) {
             this.next = false;
@@ -216,8 +285,6 @@ var GameLayer = cc.LayerColor.extend({
                 this.removeChild(sprite);
                 sprite.fragil();
                 this.score++;
-                
-                console.log(this.score);
             }
                 
         }
@@ -229,6 +296,12 @@ var GameLayer = cc.LayerColor.extend({
 var GameScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
+        var best = localStorage.getItem('best');
+        
+        if (!best) {
+            localStorage.setItem('best', 0);
+        }
+            
         var layer = new GameLayer();
         this.addChild(layer);
     }

@@ -37,7 +37,7 @@ Scenario.prototype = {
         new Boundary(space, cp.v(r, b), cp.v(r, t));
         
         walls.forEach(function (wall) {
-            layer.addChild(wall, 1000);
+            //layer.addChild(wall, 1000);
         });
     },
     pick: function () {

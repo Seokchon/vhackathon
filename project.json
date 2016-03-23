@@ -1,0 +1,19 @@
+{
+    "debugMode"     : 1,
+    "frameRate"     : 60,
+    "id"            : "gameCanvas",
+    "renderMode"    : 1,
+    "jsList"        : [
+        "src/resource.js",
+        "src/app.js",
+        "src/title.js",
+        "src/game.js",
+
+        
+        "src/components/ball.js",
+        "src/components/block.js",
+        "src/components/boundary.js",
+        "src/components/scenario.js",
+        "src/components/wall.js"
+    ]
+}

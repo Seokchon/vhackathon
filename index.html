@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Angry Block</title>
+    <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="full-screen" content="yes"/>
+    <meta name="screen-orientation" content="portrait"/>
+    <meta name="x5-fullscreen" content="true"/>
+    <meta name="360-fullscreen" content="true"/>
+    <style>
+        body, canvas, div {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -khtml-user-select: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+    </style>
+    <!--script type="text/javascript" src="cocos2d-js-v3.10-lite.js" charset="UTF-8"></script-->
+    <!--script type="text/javascript" src="cocos2d-js-v3.10-full-uncomp.js" charset="UTF-8"></script-->
+    <script type="text/javascript" src="cocos2d-js-v3.10-full-comp.js" charset="UTF-8"></script>
+</head>
+<body style="padding:0; margin: 0; background: #000;">
+<canvas id="gameCanvas" width="480" height="720"></canvas>
+<script>
+    cc.game.onStart = function(){
+        if(!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
+            document.body.removeChild(document.getElementById("cocosLoading"));
+
+        // Pass true to enable retina display, on Android disabled by default to improve performance
+        cc.view.enableRetina(cc.sys.os === cc.sys.OS_IOS ? true : false);
+        // Adjust viewport meta
+        cc.view.adjustViewPort(true);
+        // Setup the resolution policy and design resolution size
+        cc.view.setDesignResolutionSize(640, 960, cc.ResolutionPolicy.SHOW_ALL);
+        //cc.view.setDesignResolutionSize(960, 640, cc.ResolutionPolicy.SHOW_ALL);
+        // Instead of set design resolution, you can also set the real pixel resolution size
+        // Uncomment the following line and delete the previous line.
+        // cc.view.setRealPixelResolution(960, 640, cc.ResolutionPolicy.SHOW_ALL);
+        // The game will be resized when browser size change
+        cc.view.resizeWithBrowserSize(true);
+        //load resources
+        cc.LoaderScene.preload(g_resources, function () {
+            cc.director.runScene(new TitleScene());
+        }, this);
+    };
+    cc.game.run();
+</script>
+</body>
+</html>
